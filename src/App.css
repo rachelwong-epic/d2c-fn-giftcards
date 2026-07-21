@@ -44,6 +44,39 @@
     min-height: var(--eds_370_adnoaf0) !important;
     max-height: var(--eds_370_adnoaf0) !important;
   }
+
+  /* Currency / amount: stretch across the full row for larger tap targets */
+  .purchase-choice-toggles--fill {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .purchase-choice-toggles--fill button[aria-pressed] {
+    flex: 1 1 0;
+    max-width: none !important;
+    width: auto !important;
+    justify-content: center;
+  }
+
+  .amount-chooser-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: var(--eds_370_adnoafip, 0.5rem);
+    width: 100%;
+  }
+
+  .amount-chooser-row .purchase-choice-toggles--fill {
+    flex: 4 1 0;
+    min-width: 0;
+  }
+
+  .amount-chooser-row .amount-other-input {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    align-self: stretch;
+  }
 }
 
 .amount-other-input input {

@@ -167,7 +167,7 @@ export default function PurchaseForm({
           shape="rectangular"
           size="lg"
           layout="label-only"
-          className="purchase-choice-toggles"
+          className="purchase-choice-toggles purchase-choice-toggles--fill"
           value={currency}
           onChange={(value) => setCurrency(exclusiveSelection(currency, value))}
         >
@@ -183,13 +183,13 @@ export default function PurchaseForm({
           Choose an amount
         </Text>
         <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="amount-chooser-row flex flex-wrap items-center gap-2">
             <ToggleGroup
               aria-label="Gift card amount"
               shape="rectangular"
               size="lg"
               layout="label-only"
-              className="purchase-choice-toggles"
+              className="purchase-choice-toggles purchase-choice-toggles--fill"
               value={amount}
               onChange={(value) => {
                 setOtherAmount("");
