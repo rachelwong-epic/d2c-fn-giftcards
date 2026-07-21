@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import Button from "@eds/react/Button";
 import Text from "@eds/react/Text";
 import TextField from "@eds/react/TextField";
+import Link from "@eds/react/Link";
 import Toggle from "@eds/react/Toggle";
 import ToggleGroup from "@eds/react/ToggleGroup";
 import Select from "@eds/react/Select";
@@ -87,9 +88,11 @@ export default function PurchaseForm({
     ? "We'll email the gift card code to the recipient."
     : "You'll receive an email with your gift card code.";
 
-  const linkDeliveryDescription = isForSomeoneElse
-    ? "You'll get a link to share with them however you like."
-    : "You'll get a link to redeem your gift card.";
+  const yourEmailHelper = !isForSomeoneElse
+    ? "We'll send your gift card code and receipt here."
+    : isEmailDelivery
+      ? "We'll send your receipt here."
+      : "We'll send the link here.";
 
   return (
     <form
@@ -120,7 +123,13 @@ export default function PurchaseForm({
           shape="rectangular"
           size="lg"
           value={recipient}
-          onChange={(value) => setRecipient(exclusiveSelection(recipient, value))}
+          onChange={(value) => {
+            const next = exclusiveSelection(recipient, value);
+            setRecipient(next);
+            if (next[0] === "me") {
+              setDelivery("email");
+            }
+          }}
         >
           <Toggle
             value="me"
@@ -167,14 +176,9 @@ export default function PurchaseForm({
       </section>
 
       <section className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <Text variant="headingSM" as="h2">
-            Choose an amount
-          </Text>
-          <Text variant="uiMD" color="secondary">
-            You can purchase up to {currencySymbol}2000 in gift cards.
-          </Text>
-        </div>
+        <Text variant="headingSM" as="h2">
+          Choose an amount
+        </Text>
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <ToggleGroup
@@ -280,53 +284,82 @@ export default function PurchaseForm({
               </span>
             }
           />
-          <Radio
-            className="delivery-option"
-            style={deliveryCardStyle}
-            value="link"
-            size="md"
-            aria-label="Get a link"
-            label={
-              <span className="delivery-option-content">
-                <LinkIcon className="delivery-option-icon" aria-hidden />
-                <span className="delivery-option-text">
-                  <Text variant="uiMD" as="span" className="font-bold">
-                    Get a link
-                  </Text>
-                  <Text variant="uiSM" color="secondary" as="span">
-                    {linkDeliveryDescription}
-                  </Text>
+          {isForSomeoneElse ? (
+            <Radio
+              className="delivery-option"
+              style={deliveryCardStyle}
+              value="link"
+              size="md"
+              aria-label="Get a link"
+              label={
+                <span className="delivery-option-content">
+                  <LinkIcon className="delivery-option-icon" aria-hidden />
+                  <span className="delivery-option-text">
+                    <Text variant="uiMD" as="span" className="font-bold">
+                      Get a link
+                    </Text>
+                    <Text variant="uiSM" color="secondary" as="span">
+                      You'll get a link to share with them however you like.
+                    </Text>
+                  </span>
                 </span>
-              </span>
-            }
-          />
+              }
+            />
+          ) : null}
         </RadioGroup>
       </section>
 
-      {isForSomeoneElse && (
+      {!isForSomeoneElse ? (
         <section className="flex flex-col gap-4">
           <Text variant="headingSM" as="h2">
-            {isEmailDelivery
-              ? "Where would you like to send it?"
-              : "Who’s this gift for?"}
+            Where would you like to send it?
+          </Text>
+          <TextField
+            label="Your email"
+            size="lg"
+            type="email"
+            placeholder="name@example.com"
+            value={email}
+            onChange={setEmail}
+            helperText="We'll send your gift card code and receipt here."
+          />
+        </section>
+      ) : null}
+
+      {isForSomeoneElse && isEmailDelivery ? (
+        <section className="flex flex-col gap-4">
+          <Text variant="headingSM" as="h2">
+            Where would you like to send it?
           </Text>
           <div className="flex flex-col gap-6">
             <TextField
               label="Recipient name"
               size="lg"
               value={recipientName}
-              onChange={(value) => setRecipientName(value)}
+              onChange={setRecipientName}
             />
-            {isEmailDelivery && (
-              <TextField
-                label="Recipient email"
-                size="lg"
-                type="email"
-                placeholder="name@example.com"
-                value={recipientEmail}
-                onChange={(value) => setRecipientEmail(value)}
-              />
-            )}
+            <TextField
+              label="Recipient email"
+              size="lg"
+              type="email"
+              placeholder="name@example.com"
+              value={recipientEmail}
+              onChange={setRecipientEmail}
+              helperText={
+                <>
+                  Don&apos;t have their email?{" "}
+                  <Link
+                    href="#"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setDelivery("link");
+                    }}
+                  >
+                    Get a link to share instead.
+                  </Link>
+                </>
+              }
+            />
             <Select
               label="Message (optional)"
               placeholder="Select a message"
@@ -339,29 +372,32 @@ export default function PurchaseForm({
             />
           </div>
         </section>
-      )}
+      ) : null}
 
-      <section className="flex flex-col gap-4">
-        <Text variant="headingSM" as="h2">
-          Your details
-        </Text>
-        <div className="flex flex-col gap-6">
-          <TextField
-            label="Your name"
-            size="lg"
-            value={name}
-            onChange={(value) => setName(value)}
-          />
-          <TextField
-            label="Your email"
-            size="lg"
-            type="email"
-            placeholder="name@example.com"
-            value={email}
-            onChange={(value) => setEmail(value)}
-          />
-        </div>
-      </section>
+      {isForSomeoneElse ? (
+        <section className="flex flex-col gap-4">
+          <Text variant="headingSM" as="h2">
+            Your details
+          </Text>
+          <div className="flex flex-col gap-6">
+            <TextField
+              label="Your name"
+              size="lg"
+              value={name}
+              onChange={setName}
+            />
+            <TextField
+              label="Your email"
+              size="lg"
+              type="email"
+              placeholder="name@example.com"
+              value={email}
+              onChange={setEmail}
+              helperText={yourEmailHelper}
+            />
+          </div>
+        </section>
+      ) : null}
 
       <Button variant="cta" size="xl" fullWidth type="submit">
         Continue to checkout
