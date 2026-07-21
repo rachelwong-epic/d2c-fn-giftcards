@@ -6,7 +6,7 @@ import { themeVars } from "@eds/react";
 
 const AUTH_STORAGE_KEY = "d2c-fn-giftcards-auth";
 const EXPECTED_USER = import.meta.env.VITE_SITE_USER ?? "epic";
-const EXPECTED_PASS = import.meta.env.VITE_SITE_PASSWORD ?? "giftcard";
+const EXPECTED_PASS = import.meta.env.VITE_SITE_PASSWORD ?? "FnGift#2026!";
 
 function isAuthenticated(): boolean {
   try {
