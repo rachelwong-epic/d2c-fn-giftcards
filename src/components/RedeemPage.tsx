@@ -312,6 +312,7 @@ export default function RedeemPage({ onBuyDigitalGiftCard }: RedeemPageProps) {
               gap={16}
               variant="solid"
               size="md"
+              className="faq-accordions"
               key={String(faqTab)}
             >
               {faqs.map((faq) => (

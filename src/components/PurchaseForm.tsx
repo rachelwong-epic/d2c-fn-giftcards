@@ -165,13 +165,14 @@ export default function PurchaseForm({
           aria-label="Currency"
           shape="rectangular"
           size="lg"
+          layout="label-only"
           value={currency}
           onChange={(value) => setCurrency(exclusiveSelection(currency, value))}
         >
-          <Toggle value="usd" label="$ USD" shape="rectangular" size="lg" />
-          <Toggle value="cad" label="$ CAD" shape="rectangular" size="lg" />
-          <Toggle value="eur" label="€ EUR" shape="rectangular" size="lg" />
-          <Toggle value="gbp" label="£ GBP" shape="rectangular" size="lg" />
+          <Toggle value="usd" label="$ USD" shape="rectangular" size="lg" layout="label-only" />
+          <Toggle value="cad" label="$ CAD" shape="rectangular" size="lg" layout="label-only" />
+          <Toggle value="eur" label="€ EUR" shape="rectangular" size="lg" layout="label-only" />
+          <Toggle value="gbp" label="£ GBP" shape="rectangular" size="lg" layout="label-only" />
         </ToggleGroup>
       </section>
 
@@ -185,6 +186,7 @@ export default function PurchaseForm({
               aria-label="Gift card amount"
               shape="rectangular"
               size="lg"
+              layout="label-only"
               value={amount}
               onChange={(value) => {
                 setOtherAmount("");
@@ -198,6 +200,7 @@ export default function PurchaseForm({
                   label={`${currencySymbol}${preset}`}
                   shape="rectangular"
                   size="lg"
+                  layout="label-only"
                 />
               ))}
             </ToggleGroup>
@@ -262,7 +265,7 @@ export default function PurchaseForm({
           value={delivery}
           onChange={setDelivery}
           gap={8}
-          className="w-full"
+          className="delivery-radio-group w-full"
         >
           <Radio
             className="delivery-option"

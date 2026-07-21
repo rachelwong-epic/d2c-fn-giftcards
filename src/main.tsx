@@ -5,6 +5,7 @@ import "@epic-typeface/recursive";
 import EDSProvider from "@eds/react/EDSProvider";
 import { lowDensityThemeClass } from "@eds/react";
 import "./index.css";
+import "./App.css";
 import App from "./App.tsx";
 import SiteAuthGate from "./components/SiteAuthGate.tsx";
 

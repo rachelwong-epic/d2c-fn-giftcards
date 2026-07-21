@@ -81,7 +81,7 @@ export default function FaqSection({
         <Text variant="headingLG" as="h2">
           Frequently asked questions
         </Text>
-        <AccordionGroup gap={16} variant="solid" size="md">
+        <AccordionGroup gap={16} variant="solid" size="md" className="faq-accordions">
           {FAQS.map((faq) => (
             <Accordion
               key={faq.question}

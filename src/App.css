@@ -102,6 +102,34 @@
   flex-shrink: 0;
 }
 
+/* EDS RadioGroup forces 32px gap on coarse pointers — keep Figma’s 8px */
+.delivery-radio-group {
+  gap: var(--eds_370_adnoafip, 0.5rem) !important;
+}
+
+@media (pointer: coarse) {
+  .delivery-radio-group {
+    gap: var(--eds_370_adnoafip, 0.5rem) !important;
+  }
+}
+
+/* Keep FAQ chevrons on the right when titles wrap on mobile */
+.faq-accordions button[aria-expanded] {
+  flex-wrap: nowrap !important;
+  width: 100%;
+  align-items: flex-start;
+}
+
+.faq-accordions button[aria-expanded] > span:first-of-type {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.faq-accordions button[aria-expanded] > svg {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+}
+
 /* Payment brand marks — keep natural aspect (Figma SVGs often stretch otherwise) */
 .payment-logo img {
   display: block;
