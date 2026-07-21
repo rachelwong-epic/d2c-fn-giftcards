@@ -68,9 +68,10 @@ export default function CheckoutPage({
       style={{ backgroundColor: themeVars.color.background.default }}
     >
       <header
-        className="relative sticky top-0 z-20 mx-auto flex h-[72px] w-full max-w-[1440px] items-center justify-between px-6 backdrop-blur-[50px] lg:px-20"
+        className="sticky top-0 z-20 w-full backdrop-blur-[50px]"
         style={{ backgroundColor: "rgba(16, 16, 20, 0.9)" }}
       >
+        <div className="relative mx-auto flex h-[72px] w-full max-w-[1440px] items-center justify-between px-6 lg:px-20">
         <div className="flex items-center gap-2">
           <div className="relative size-8 shrink-0">
             <span className="absolute inset-y-0 right-full mr-2 flex items-center">
@@ -116,6 +117,7 @@ export default function CheckoutPage({
             </Text>
           </button>
         </nav>
+        </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-12 px-6 pb-20 pt-10 lg:flex-row lg:items-start lg:gap-16 lg:px-20 lg:pt-16">

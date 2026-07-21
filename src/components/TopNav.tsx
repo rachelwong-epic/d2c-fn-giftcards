@@ -14,9 +14,10 @@ type TopNavProps = {
 export default function TopNav({ onBack }: TopNavProps) {
   return (
     <header
-      className="relative sticky top-0 z-20 mx-auto flex h-[72px] w-full max-w-[1440px] items-center justify-between px-6 backdrop-blur-[50px] lg:px-20 xl:px-40"
+      className="sticky top-0 z-20 w-full backdrop-blur-[50px]"
       style={{ backgroundColor: themeVars.color.background.default }}
     >
+      <div className="relative mx-auto flex h-[72px] w-full max-w-[1440px] items-center justify-between px-6 lg:px-20 xl:px-40">
       <div className="flex min-w-0 flex-1 items-center gap-6">
         <div className="flex shrink-0 items-center gap-3">
           <div className="relative size-8 shrink-0">
@@ -70,6 +71,7 @@ export default function TopNav({ onBack }: TopNavProps) {
       <Button variant="cta" size="md">
         Download
       </Button>
+      </div>
     </header>
   );
 }
