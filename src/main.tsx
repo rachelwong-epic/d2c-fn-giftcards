@@ -6,12 +6,15 @@ import EDSProvider from "@eds/react/EDSProvider";
 import { lowDensityThemeClass } from "@eds/react";
 import "./index.css";
 import App from "./App.tsx";
+import SiteAuthGate from "./components/SiteAuthGate.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <div className={lowDensityThemeClass}>
       <EDSProvider themeClass={lowDensityThemeClass}>
-        <App />
+        <SiteAuthGate>
+          <App />
+        </SiteAuthGate>
       </EDSProvider>
     </div>
   </StrictMode>,
