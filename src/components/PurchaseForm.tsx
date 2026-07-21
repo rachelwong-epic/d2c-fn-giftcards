@@ -104,7 +104,7 @@ export default function PurchaseForm({
         <Text variant="headingXL" as="h1">
           Buy a gift card
         </Text>
-        <Text variant="uiLG" color="secondary">
+        <Text variant="uiMD" color="secondary">
           Redeemable for games, V-Bucks, and more on the Epic Games Store.
         </Text>
       </div>
@@ -146,7 +146,7 @@ export default function PurchaseForm({
           <Text variant="headingSM" as="h2">
             Choose a currency
           </Text>
-          <Text variant="uiSM" color="secondary">
+          <Text variant="uiMD" color="secondary">
             {isForSomeoneElse
               ? "Must match the recipient's Epic Games account — this can't be changed later. Not sure which they use? Check with them first."
               : "Must match your Epic Games account — this can't be changed later. We've pre-selected one based on your location."}
@@ -171,7 +171,7 @@ export default function PurchaseForm({
           <Text variant="headingSM" as="h2">
             Choose an amount
           </Text>
-          <Text variant="uiSM" color="secondary">
+          <Text variant="uiMD" color="secondary">
             You can purchase up to {currencySymbol}2000 in gift cards.
           </Text>
         </div>
