@@ -221,9 +221,10 @@ export default function RedeemPage({ onBuyDigitalGiftCard }: RedeemPageProps) {
             <button
               type="button"
               onClick={onBuyDigitalGiftCard}
-              className="flex h-[92px] w-full items-center gap-4 rounded-lg p-6 text-left transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="flex h-[92px] w-full items-center gap-4 p-6 text-left transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
               style={{
                 backgroundColor: themeVars.color.background.fill.faint,
+                borderRadius: themeVars.size.borderRadius[16],
                 outlineColor: themeVars.color.border.focus.default,
               }}
             >
