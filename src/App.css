@@ -29,6 +29,23 @@
   max-height: var(--eds_370_adnoafc2) !important;
 }
 
+/*
+  Mobile: match CTA xl height (action.area.5xl / 3rem).
+  EDS Toggle maxes out at lg (2.5rem), so bump chooser hit targets.
+*/
+@media (max-width: 1023px) {
+  .purchase-choice-toggles button[aria-pressed] {
+    height: var(--eds_370_adnoaf0) !important;
+    min-height: var(--eds_370_adnoaf0) !important;
+  }
+
+  .amount-other-input label:has(input) {
+    height: var(--eds_370_adnoaf0) !important;
+    min-height: var(--eds_370_adnoaf0) !important;
+    max-height: var(--eds_370_adnoaf0) !important;
+  }
+}
+
 .amount-other-input input {
   min-height: 0 !important;
   line-height: 1.2;

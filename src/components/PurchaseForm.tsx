@@ -122,6 +122,7 @@ export default function PurchaseForm({
           aria-label="Who is this for?"
           shape="rectangular"
           size="lg"
+          className="purchase-choice-toggles"
           value={recipient}
           onChange={(value) => {
             const next = exclusiveSelection(recipient, value);
@@ -166,6 +167,7 @@ export default function PurchaseForm({
           shape="rectangular"
           size="lg"
           layout="label-only"
+          className="purchase-choice-toggles"
           value={currency}
           onChange={(value) => setCurrency(exclusiveSelection(currency, value))}
         >
@@ -187,6 +189,7 @@ export default function PurchaseForm({
               shape="rectangular"
               size="lg"
               layout="label-only"
+              className="purchase-choice-toggles"
               value={amount}
               onChange={(value) => {
                 setOtherAmount("");
