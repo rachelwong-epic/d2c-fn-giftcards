@@ -60,6 +60,7 @@
 
   .amount-chooser-row {
     display: flex;
+    flex-direction: column;
     flex-wrap: nowrap;
     align-items: stretch;
     gap: var(--eds_370_adnoafip, 0.5rem);
@@ -67,13 +68,14 @@
   }
 
   .amount-chooser-row .purchase-choice-toggles--fill {
-    flex: 4 1 0;
+    flex: none;
+    width: 100%;
     min-width: 0;
   }
 
   .amount-chooser-row .amount-other-input {
-    flex: 1 1 0;
-    width: auto;
+    flex: none;
+    width: 100%;
     min-width: 0;
     align-self: stretch;
   }
