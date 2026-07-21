@@ -158,8 +158,8 @@ export default function PurchaseForm({
           </Text>
           <Text variant="uiMD" color="secondary">
             {isForSomeoneElse
-              ? "Must match the recipient's Epic Games account — this can't be changed later. Not sure which they use? Check with them first."
-              : "Must match your Epic Games account — this can't be changed later. We've pre-selected one based on your location."}
+              ? "Choose the currency that matches the recipient's Epic Games account, since you can't change it after checkout. Not sure which they use? Check with them first."
+              : "We've picked a currency based on your location. Make sure it matches your Epic Games account, since you can't change it after checkout."}
           </Text>
         </div>
         <ToggleGroup
