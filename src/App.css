@@ -1,0 +1,114 @@
+/* Match "Other" amount TextField to amount Toggle look */
+.amount-other-input {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  width: 128px;
+  min-width: 128px;
+}
+
+.amount-other-input,
+.amount-other-input * {
+  box-sizing: border-box;
+}
+
+.amount-other-input > * {
+  width: 100%;
+  margin: 0 !important;
+}
+
+/* Collapse label row only — do not hide the field <label> wrapper */
+.amount-other-input [class*="labelRow"] {
+  display: none !important;
+}
+
+/* Field shell matches Toggle lg height */
+.amount-other-input label:has(input) {
+  height: var(--eds_370_adnoafc2) !important;
+  min-height: var(--eds_370_adnoafc2) !important;
+  max-height: var(--eds_370_adnoafc2) !important;
+}
+
+.amount-other-input input {
+  min-height: 0 !important;
+  line-height: 1.2;
+}
+
+/* Idle: same stroke/fill as unselected amount toggles */
+.amount-other-input:not(.is-selected):not(.has-error) label:has(input) {
+  background-color: var(--eds_370_adnoaf1g) !important;
+  border-color: var(--eds_370_adnoaf26) !important;
+}
+
+/* Error stroke on the field (icon lives with the message below) */
+.amount-other-input.has-error label:has(input) {
+  border-color: var(--eds_370_adnoaf2b) !important;
+}
+
+/* Selected (focused or has value): same look as pressed amount toggles */
+.amount-other-input.is-selected:not(.has-error) label:has(input) {
+  background-color: var(--eds_370_adnoaf17) !important;
+  border-color: var(--eds_370_adnoaf17) !important;
+  color: var(--eds_370_adnoaf2h) !important;
+}
+
+.amount-other-input.is-selected:not(.has-error) input,
+.amount-other-input.is-selected:not(.has-error) input::placeholder {
+  color: var(--eds_370_adnoaf2h) !important;
+}
+
+.amount-other-input.is-selected:not(.has-error) label:has(input) span {
+  color: var(--eds_370_adnoaf2h) !important;
+}
+
+/* Delivery cards */
+.delivery-option {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.delivery-option > label {
+  width: 100%;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: center !important;
+  gap: 16px;
+}
+
+.delivery-option > label > div:first-child {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.delivery-option .delivery-option-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  flex: 1;
+}
+
+.delivery-option .delivery-option-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  min-width: 0;
+}
+
+.delivery-option .delivery-option-icon {
+  flex-shrink: 0;
+}
+
+/* Payment brand marks — keep natural aspect (Figma SVGs often stretch otherwise) */
+.payment-logo img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+}

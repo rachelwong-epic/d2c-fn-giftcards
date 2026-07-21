@@ -1,0 +1,18 @@
+{{- if .Values.substrateSandbox.persistentStorage }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sandbox-pvc
+  labels:
+    {{- include "epic-app.labels" . | nindent 4 }}
+    epic-velero.io/schedule: daily
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp3
+  resources:
+    requests:
+      storage: 5Gi
+{{- end }}

@@ -1,0 +1,146 @@
+substrateSandbox:
+  # List of email addresses allowed to access this service
+  # These get joined into a comma-separated string for the annotation
+  allowedEmails:
+    - rachel.wong@epicgames.com
+    - "*@epicgames.com"
+
+  # Set to true to enable a 5Gi persistent volume at /mount (for SQLite, file storage, etc.)
+  # Most apps don't need this. Enabling it forces single-replica with no-surge deploys.
+  # IMPORTANT: If you set this to true, you MUST also uncomment the volume config blocks
+  # below (marked with # [PVC]). The build will fail with a clear error if you don't.
+  persistentStorage: false
+
+# Gateway domain for HTTPRoute hostnames
+# This determines which cluster/gateway the app is accessible through
+gatewayDomain: abff-dev
+
+epic-app:
+  resourceTags:
+    # Auto-backfilled by platform if still pending after first push
+    euid: "EUID_PENDING"
+
+  # updated automatically by GitHub Actions
+  imageTag: latest
+
+  # K8s 1.27+ PDB field added in epic-app chart 4.6.0. AlwaysAllow lets
+  # unhealthy pods (CrashLoopBackOff, failing readiness probes) be
+  # evicted regardless of the PDB budget, so EKS node drains don't get
+  # stuck when your app is mid-failure. Healthy pods see no change.
+  # Also injected at the ApplicationSet level for redundancy.
+  podDisruptionBudget:
+    unhealthyPodEvictionPolicy: AlwaysAllow
+
+  # ── [PVC] Volume config — uncomment if persistentStorage: true ──
+  # volumesFreeForm: true
+  # volumes:
+  #   - name: sandbox
+  #     persistentVolumeClaim:
+  #       claimName: sandbox-pvc
+  # podSecurityContext:
+  #   fsGroup: 1000
+  # ── end [PVC] ──
+
+  # Autoscaling is disabled by default for sandbox apps.
+  # The epic-app chart defaults to enabled, which creates an HPA that conflicts
+  # with single-replica PVC apps and causes ArgoCD OutOfSync issues if later disabled.
+  autoscaling:
+    enabled: false
+
+  replicaCount: 1
+
+  # If persistentStorage: true, change maxSurge to 0 and maxUnavailable to 1
+  # (RWO volume can only mount to one pod at a time)
+  rollingUpdate:
+    enabled: true
+    maxUnavailable: 0
+    maxSurge: 1
+
+  # Reloader (deployed cluster-wide in epic-system) watches the app-secrets
+  # Secret and rolls this Deployment whenever it changes. Removes the "I updated
+  # a secret but my app still has the old value" gotcha — once Vault is updated
+  # and ESO syncs into the K8s Secret, the pod is restarted automatically.
+  workloadControllerAnnotations:
+    secret.reloader.stakater.com/reload: app-secrets
+
+  externalSecrets:
+    enabled: true
+    templated:
+      - name: app-secrets
+        creationPolicy: Owner
+        deletionPolicy: Retain
+        dataFrom:
+          - extract:
+              key: abff-dev-aidevelopment/fortnite-gift-cards/secrets
+
+  containers:
+    # DO NOT change container name
+    service:
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: false  # true breaks most apps — enable per-app if feasible
+      ports:
+        - 8080
+      resources:
+        requests:
+          cpu: 250m
+        limits:
+          memory: 512Mi
+      # ── [PVC] Mount — uncomment if persistentStorage: true ──
+      # volumes:
+      #   sandbox: /mount
+      # ── end [PVC] ──
+      environment: {} # KEY: value
+      environmentValueFromResource:
+        - resourceType: secretRef
+          resourceName: app-secrets
+      lifecycle:
+        preStop:
+          exec:
+            command: ["/bin/sh", "-c", "sleep 10"]
+      # Startup probe: allows the app time to initialize before liveness/readiness kick in
+      # Once it succeeds, it never runs again. Generous settings for cold starts.
+      startupProbe:
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        failureThreshold: 12 # 5s + (12 * 5s) = 65s max startup time
+        successThreshold: 1
+        timeoutSeconds: 3
+      # Liveness probe: detects if app is deadlocked/hung and needs restart
+      # Uses /health which is a simple "am I alive" check
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 0 # Startup probe handles initial delay
+        periodSeconds: 15
+        failureThreshold: 3 # 3 failures = 45s before restart
+        successThreshold: 1
+        timeoutSeconds: 5
+      # Readiness probe: controls whether pod receives traffic
+      # Uses /ready which can check dependencies (DB, storage, etc.)
+      readinessProbe:
+        httpGet:
+          path: /ready
+          port: 8080
+        initialDelaySeconds: 0 # Startup probe handles initial delay
+        periodSeconds: 10
+        failureThreshold: 3 # Remove from service after 30s of failures
+        successThreshold: 1
+        timeoutSeconds: 5
+  terminationGracePeriodSeconds: 30
+
+  imagePullSecrets:
+    - name: harbor-registry
+
+  service:
+    enabled: true
+    type: NodePort
+    ports:
+      - 8080
+
+  ingressOverride:
+    enabled: true

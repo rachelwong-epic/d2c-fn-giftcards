@@ -1,0 +1,11 @@
+apiVersion: v2
+name: application
+description: ai-powered app
+type: application
+version: 1.0.0
+appVersion: 1.0.0
+
+dependencies:
+  - name: epic-app
+    version: ^4.6.0
+    repository: https://artifacts.ol.epicgames.net/artifactory/substr-helm

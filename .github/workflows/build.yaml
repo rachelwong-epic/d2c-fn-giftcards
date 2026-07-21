@@ -1,0 +1,156 @@
+---
+name: Build and Deploy
+# Epic Sandbox only — do not run on public GitHub pushes
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-image:
+    name: Build and Sign Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.build.outputs.image_tags }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Retrieve Vault secrets (Artifactory)
+        uses: hashicorp/vault-action@v2.4.0
+        with:
+          url: https://vault.substrate.on.epicgames.com
+          method: approle
+          roleId: ${{ secrets.APP_ROLE_ID }}
+          secretId: ${{ secrets.APP_ROLE_SECRET }}
+          secrets: |
+            secret/data/ops/ghe-orgs/global/live/runtime/artifactory-${{ github.repository_owner }} username | EPIC_BUILD_CREDENTIALS_ARTIFACTS_USERNAME ;
+            secret/data/ops/ghe-orgs/global/live/runtime/artifactory-${{ github.repository_owner }} password | EPIC_BUILD_CREDENTIALS_ARTIFACTS_PASSWORD ;
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Build frontend (EDS via Artifactory)
+        run: |
+          set -euo pipefail
+          BASIC_AUTH=$(printf '%s:%s' "$EPIC_BUILD_CREDENTIALS_ARTIFACTS_USERNAME" "$EPIC_BUILD_CREDENTIALS_ARTIFACTS_PASSWORD" | base64 | tr -d '\n')
+          npm config set registry "https://artifacts.ol.epicgames.net/artifactory/api/npm/npm-all/"
+          npm config set //artifacts.ol.epicgames.net/artifactory/api/npm/npm-all/:_auth "$BASIC_AUTH"
+          npm config set //artifacts.ol.epicgames.net/artifactory/api/npm/npm-all/:always-auth true
+          npm ci
+          npm run build
+
+      - name: Validate Dockerfile base images use Harbor registry
+        shell: bash
+        run: |
+          if [ ! -f Dockerfile ]; then
+            echo "⚠️ No Dockerfile found — skipping base image check"
+            exit 0
+          fi
+          VIOLATIONS=$(grep -iE '^FROM\s+' Dockerfile | grep -ivE 'harbor\.ol\.epicgames\.net|scratch|AS\s+\w+$' | grep -vE '^\s*#' || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ Dockerfile uses non-Harbor base images:"
+            echo "$VIOLATIONS"
+            echo ""
+            echo "All base images must use harbor.ol.epicgames.net. Examples:"
+            echo "  harbor.ol.epicgames.net/docker-hub/node:20-alpine"
+            echo "  harbor.ol.epicgames.net/docker-hub/python:3.12-slim"
+            echo "  harbor.ol.epicgames.net/ghcr/golang:1.24-alpine"
+            exit 1
+          fi
+          echo "✅ All base images use Harbor registry"
+
+      - name: Harbor build and sign
+        id: build
+        uses: Epic-Standardized-CICD/docker-build-and-sign/.github/actions/docker-build-and-sign@4448d42dbbd309148ba9a571c3fd2b6f3696aa89 # main 2026-05-13
+
+      - name: Fail if image signing did not fully succeed
+        if: steps.build.outputs.signing_result != 'success'
+        shell: bash
+        env:
+          RESULT: ${{ steps.build.outputs.signing_result }}
+        run: |
+          echo "❌ Image signing did not fully succeed (signing_result=$RESULT)"
+          echo ""
+          echo "Possible causes:"
+          echo "  - Harbor was flaky during signing (transient — re-run the workflow)"
+          echo "  - One or more platform manifests failed to sign"
+          echo "  - No images were produced for this build"
+          echo ""
+          echo "Re-run the workflow. If it persists, post in #ct-substrate-sandbox-support-ext."
+          exit 1
+
+  sync-secrets:
+    name: Sync Secrets to Vault
+    runs-on: ubuntu-latest
+    needs: build-image
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: ai-dev/actions/.github/actions/sync-secrets@main
+        with:
+          app_role_id: ${{ secrets.APP_ROLE_ID }}
+          app_role_secret: ${{ secrets.APP_ROLE_SECRET }}
+          gh_app_id: ${{ secrets.GH_APP_ID }}
+          gh_app_private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          all_secrets: ${{ toJSON(secrets) }}
+          vault_path_prefix: abff-dev/data/abff-dev-aidevelopment
+          is_main_branch: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
+
+  deploy:
+    name: Deploy to ArgoCD
+    runs-on: ubuntu-latest
+    needs: [build-image, sync-secrets]
+    if: ${{ always() && needs.build-image.result == 'success' && needs.sync-secrets.result != 'failure' && github.event.repository.name != 'template' }}
+    outputs:
+      is_main: ${{ steps.branch-check.outputs.is_main }}
+      deployed: ${{ steps.branch-check.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          sparse-checkout: deploy/target
+
+      - name: Check branch deploy eligibility
+        id: branch-check
+        shell: bash
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          if [[ "$BRANCH" == "main" || "$BRANCH" == "master" ]]; then
+            echo "is_main=true" >> $GITHUB_OUTPUT
+            echo "deploy=true" >> $GITHUB_OUTPUT
+            echo "✅ Main branch — will deploy"
+          elif [ -f deploy/target/multi-branch ]; then
+            echo "is_main=false" >> $GITHUB_OUTPUT
+            echo "deploy=true" >> $GITHUB_OUTPUT
+            echo "✅ Branch '$BRANCH' has multi-branch marker — will deploy"
+          else
+            echo "is_main=false" >> $GITHUB_OUTPUT
+            echo "deploy=false" >> $GITHUB_OUTPUT
+            echo "⏭️ Branch '$BRANCH' — no deploy/target/multi-branch marker, skipping deploy"
+          fi
+
+      - uses: ai-dev/actions/.github/actions/argocd-deploy@main
+        if: steps.branch-check.outputs.deploy == 'true'
+        with:
+          app_role_id: ${{ secrets.APP_ROLE_ID }}
+          app_role_secret: ${{ secrets.APP_ROLE_SECRET }}
+          image_tag: ${{ needs.build-image.outputs.image_tag }}
+          cluster_name: abff-dev-aidevelopment
+          is_main_branch: ${{ steps.branch-check.outputs.is_main }}
+
+  health-check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    needs: [build-image, deploy]
+    if: ${{ needs.deploy.result == 'success' && needs.deploy.outputs.deployed == 'true' }}
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: ai-dev/actions/.github/actions/health-check@main
+        with:
+          app_role_id: ${{ secrets.APP_ROLE_ID }}
+          app_role_secret: ${{ secrets.APP_ROLE_SECRET }}
+          image_tag: ${{ needs.build-image.outputs.image_tag }}
+          cluster_name: abff-dev-aidevelopment
+          is_main_branch: ${{ needs.deploy.outputs.is_main }}
