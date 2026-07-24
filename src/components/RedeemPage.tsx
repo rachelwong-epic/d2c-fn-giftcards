@@ -157,12 +157,16 @@ const BUYING_FAQS = [
 ] as const;
 
 type RedeemPageProps = {
-  onBuyDigitalGiftCard: () => void;
+  onBack?: () => void;
+  onBuyDigitalGiftCard?: () => void;
 };
 
-export default function RedeemPage({ onBuyDigitalGiftCard }: RedeemPageProps) {
+export default function RedeemPage({
+  onBack,
+  onBuyDigitalGiftCard,
+}: RedeemPageProps) {
   const [code, setCode] = useState("");
-  const [faqTab, setFaqTab] = useState<string | number>("buying");
+  const [faqTab, setFaqTab] = useState<string | number>("redeeming");
 
   const faqs = faqTab === "redeeming" ? REDEEMING_FAQS : BUYING_FAQS;
 
@@ -180,7 +184,7 @@ export default function RedeemPage({ onBuyDigitalGiftCard }: RedeemPageProps) {
         aria-hidden
       />
 
-      <TopNav />
+      <TopNav onBack={onBack} />
 
       <main className={`relative mx-auto w-full max-w-[1440px] ${pagePad}`}>
         {/* Hero — matches live redeem page */}
@@ -217,35 +221,40 @@ export default function RedeemPage({ onBuyDigitalGiftCard }: RedeemPageProps) {
               </Button>
             </div>
 
-            {/* New: Buy a digital gift card (from Figma) */}
-            <button
-              type="button"
-              onClick={onBuyDigitalGiftCard}
-              className="flex h-[92px] w-full items-center gap-4 p-6 text-left transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-              style={{
-                backgroundColor: themeVars.color.background.fill.faint,
-                borderRadius: themeVars.size.borderRadius[16],
-                outlineColor: themeVars.color.border.focus.default,
-              }}
-            >
-              <span className="inline-flex size-10 shrink-0 items-center justify-center">
-                <IconIllustration
-                  icon={<GiftCardIcon color="primary" />}
-                  size={40}
-                  color="blue"
+            {onBuyDigitalGiftCard ? (
+              <button
+                type="button"
+                onClick={onBuyDigitalGiftCard}
+                className="flex h-[92px] w-full items-center gap-4 p-6 text-left transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                style={{
+                  backgroundColor: themeVars.color.background.fill.faint,
+                  borderRadius: themeVars.size.borderRadius[16],
+                  outlineColor: themeVars.color.border.focus.default,
+                }}
+              >
+                <span className="inline-flex size-10 shrink-0 items-center justify-center">
+                  <IconIllustration
+                    icon={<GiftCardIcon color="primary" />}
+                    size={40}
+                    color="blue"
+                    aria-hidden
+                  />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <Text variant="headingSM" as="span">
+                    Buy a digital gift card
+                  </Text>
+                  <Text variant="uiMD" color="secondary" as="span">
+                    For yourself or someone else — no account needed
+                  </Text>
+                </span>
+                <ChevronRightIcon
+                  className="shrink-0"
+                  color="primary"
                   aria-hidden
                 />
-              </span>
-              <span className="flex min-w-0 flex-1 flex-col gap-1">
-                <Text variant="headingSM" as="span">
-                  Buy a digital gift card
-                </Text>
-                <Text variant="uiMD" color="secondary" as="span">
-                  For yourself or someone else — no account needed
-                </Text>
-              </span>
-              <ChevronRightIcon className="shrink-0" color="primary" aria-hidden />
-            </button>
+              </button>
+            ) : null}
           </div>
 
           <div className="relative mx-auto w-full max-w-[520px] shrink-0 lg:mx-0">
